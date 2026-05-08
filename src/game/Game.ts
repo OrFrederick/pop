@@ -10,7 +10,7 @@ import {
   UPGRADE_IRON_GRIP_FRICTION, UPGRADE_COMBO_MASTER_TIMEOUT,
   UPGRADE_COLLECTOR_EXTRA, UPGRADE_WIDE_TRAIL_LENGTH,
   ORB_GOLD_POINTS_MULT,
-  PLAYER_MAX_SPEED, PLAYER_FRICTION, PLAYER_TRAIL_LENGTH,
+  PLAYER_MAX_SPEED, PLAYER_TRAIL_LENGTH,
   SHAKE_BOSS_DEATH,
 } from './constants';
 import { Player } from './Player';
@@ -35,7 +35,7 @@ import { BossBar } from '../ui/BossBar';
 import { PowerupHUD } from '../ui/PowerupHUD';
 import { UpgradeScreen } from './UpgradeScreen';
 import {
-  createActiveEffects, isSlowActive, isMagnetActive, isGhostActive, isFrenzyActive,
+  createActiveEffects, isSlowActive, isMagnetActive, isGhostActive,
   effectiveComboTimeout, effectivePowerupInterval, effectiveSpikeInterval,
   effectiveComboMultiplier,
   type ActiveEffects, type UpgradeId,
