@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POP</title>
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <div class="hud">
+    <div class="row">Score</div>
+    <div class="val" id="score">0</div>
+    <div class="row">Best</div>
+    <div class="val" id="high" style="font-size:18px;opacity:0.7">0</div>
+    <div class="lives" id="lives">♥ ♥ ♥</div>
+  </div>
+
+  <div class="title">
+    <h1>POP</h1>
+    <p>orbs · spikes · hearts</p>
+  </div>
+
+  <div class="start-hint" id="hint">
+    move with <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span>
+    or <span class="key">↑</span><span class="key">←</span><span class="key">↓</span><span class="key">→</span>
+    · press any key to start
+  </div>
+
+  <div class="overlay" id="overlay">
+    <h2 id="endTitle">Game Over</h2>
+    <div class="final" id="finalScore">Score: 0</div>
+    <div class="high-label" id="bestScore">Best: 0</div>
+    <button id="restartBtn">Play Again</button>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
