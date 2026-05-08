@@ -166,7 +166,7 @@ export class Game {
       SPIKE_SPAWN_INTERVAL_START - this.time * 0.04
     );
     if (this.time - this.lastSpikeFrame > spikeRate) {
-      this.spikes.push(new Spike(this.w, this.h, this.player.x, this.player.y, this.time));
+      this.spikes.push(new Spike('standard', this.w, this.h, this.player.x, this.player.y, this.time));
       this.lastSpikeFrame = this.time;
     }
 
