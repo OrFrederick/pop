@@ -155,7 +155,7 @@ export class Game {
     if (this.time - this.lastOrbFrame > ORB_SPAWN_INTERVAL) {
       const cap = 4 + Math.floor(this.time / ORB_CAP_TIME);
       if (this.orbs.length < cap) {
-        this.orbs.push(new Orb(this.w, this.h, this.player.x, this.player.y));
+        this.orbs.push(new Orb('standard', this.w, this.h, this.player.x, this.player.y));
       }
       this.lastOrbFrame = this.time;
     }
