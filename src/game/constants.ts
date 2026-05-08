@@ -58,3 +58,69 @@ export const FLOAT_TEXT_FADE = 0.02;
 export const MOTION_BLUR_ALPHA = 0.25;
 
 export const HIGH_SCORE_KEY = 'pop:highscore';
+
+// Boss
+export const BOSS_RADIUS = 32;
+export const BOSS_HP = 8;
+export const BOSS_SPAWN_INTERVAL = 1800;
+export const BOSS_ESCAPE_FRAMES = 2400;
+export const BOSS_DEATH_DELAY = 30;
+export const BOSS_GOLD_SPAWN_RADIUS = 150;
+export const BOSS_BULLET_RADIUS = 5;
+export const BOSS_BULLET_SPEED = 2.5;
+export const BOSS_RING_INTERVAL = 120;
+export const BOSS_RING_COUNT = 12;
+export const BOSS_SPIRAL_INTERVAL = 8;
+export const BOSS_AIMED_INTERVAL = 90;
+export const BOSS_AIMED_SPREAD = (15 * Math.PI) / 180;
+export const BOSS_WOBBLE = 0.3;
+export const SHAKE_BOSS_DEATH = 30;
+
+// Powerup
+export const POWERUP_SPAWN_INTERVAL = 900;
+export const POWERUP_LIFETIME = 600;
+export const POWERUP_BLINK_THRESHOLD = 120;
+export const POWERUP_BLINK_INTERVAL = 8;
+export const POWERUP_RADIUS = 16;
+export const POWERUP_SHIELD_FRAMES = 480;
+export const POWERUP_SLOW_FRAMES = 300;
+export const POWERUP_MAGNET_FRAMES = 360;
+export const POWERUP_FRENZY_FRAMES = 480;
+export const POWERUP_GHOST_FRAMES = 240;
+export const POWERUP_SLOW_FACTOR = 0.5;
+export const POWERUP_MAGNET_FORCE = 3;
+export const POWERUP_HEART_WEIGHT = 20;
+export const POWERUP_OTHER_WEIGHT = 16;
+
+// Upgrades
+export const UPGRADE_SPEED_DEMON_MAXSPEED = 10;
+export const UPGRADE_SPEED_DEMON_FRICTION = 0.85;
+export const UPGRADE_IRON_GRIP_FRICTION = 0.93;
+export const UPGRADE_COMBO_MASTER_TIMEOUT = 150;
+export const UPGRADE_ORB_PULL_RADIUS = 120;
+export const UPGRADE_ORB_PULL_FORCE = 2;
+export const UPGRADE_LUCKY_DROP_INTERVAL = 600;
+export const UPGRADE_BLITZ_RATE_MULT = 0.8;
+export const UPGRADE_BLITZ_BONUS_PTS = 5;
+export const UPGRADE_COLLECTOR_EXTRA = 4;
+export const UPGRADE_WIDE_TRAIL_LENGTH = 22;
+
+// Orb variants
+export const ORB_GOLD_HUE = 45;
+export const ORB_GOLD_RADIUS_BONUS = 6;
+export const ORB_GOLD_POINTS_MULT = 3;
+export const ORB_BOMB_HUE = 0;
+export const ORB_BOMB_BLINK_INTERVAL = 6;
+export const ORB_STANDARD_WEIGHT = 75;
+export const ORB_GOLD_WEIGHT = 15;
+export const ORB_BOMB_WEIGHT = 10;
+
+// Spike variants
+export const SPIKE_FAST_COLOR = '#ff44cc';
+export const SPIKE_FAST_RADIUS = 10;
+export const SPIKE_FAST_SPEED_MULT = 2;
+export const SPIKE_HEAVY_COLOR = '#220011';
+export const SPIKE_HEAVY_RADIUS = 24;
+export const SPIKE_HEAVY_SPEED_MULT = 0.6;
+export const SPIKE_HEAVY_DAMAGE = 2;
+export const SPIKE_GHOST_FLICKER_INTERVAL = 20;
