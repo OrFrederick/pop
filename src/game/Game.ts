@@ -72,7 +72,7 @@ export class Game {
     this.setupInput(canvas);
     this.resize(canvas);
     window.addEventListener('resize', () => this.resize(canvas));
-    this.hud.update(0, this.highScore, INITIAL_LIVES);
+    this.hud.update(0, this.highScore, INITIAL_LIVES, 1);
   }
 
   private setupInput(canvas: HTMLCanvasElement): void {
@@ -135,7 +135,7 @@ export class Game {
     this.state = 'playing';
     this.player.reset(this.w / 2, this.h / 2);
     this.overlays.hideGameOver();
-    this.hud.update(this.score, this.highScore, this.lives);
+    this.hud.update(this.score, this.highScore, this.lives, 1);
   }
 
   private explode(x: number, y: number, hue: number, count: number, big = false): void {
@@ -243,7 +243,7 @@ export class Game {
     }
 
     this.shake *= SHAKE_DECAY;
-    this.hud.update(this.score, this.highScore, this.lives);
+    this.hud.update(this.score, this.highScore, this.lives, 1);
   }
 
   private draw(): void {
