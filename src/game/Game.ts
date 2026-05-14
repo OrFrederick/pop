@@ -3,7 +3,8 @@ import {
   ORB_SPAWN_INTERVAL, SPIKE_SPAWN_INTERVAL_START, SPIKE_SPAWN_INTERVAL_MIN,
   SHAKE_SPIKE_HIT, SHAKE_ORB_BASE, SHAKE_ORB_COMBO, SHAKE_HEART, SHAKE_DECAY,
   PLAYER_INVULN_FRAMES, MOTION_BLUR_ALPHA,
-  BOSS_SPAWN_INTERVAL, BOSS_HP, BOSS_DEATH_DELAY, BOSS_GOLD_SPAWN_RADIUS,
+  BOSS_SPAWN_INTERVAL, BOSS_HP, BOSS_DEATH_DELAY,
+  BOSS_GOLD_SPAWN_RADIUS, BOSS_GOLD_SPAWN_MIN_RADIUS,
   POWERUP_SHIELD_FRAMES, POWERUP_SLOW_FRAMES, POWERUP_MAGNET_FRAMES,
   POWERUP_FRENZY_FRAMES, POWERUP_GHOST_FRAMES, POWERUP_SLOW_FACTOR,
   UPGRADE_SPEED_DEMON_MAXSPEED, UPGRADE_SPEED_DEMON_FRICTION,
@@ -205,11 +206,12 @@ export class Game {
   private spawnBossGoldOrb(): void {
     if (!this.boss) return;
     const angle = Math.random() * Math.PI * 2;
-    const dist = Math.random() * BOSS_GOLD_SPAWN_RADIUS;
-    this.bossGoldOrb = new Orb(
-      'gold', this.w, this.h, this.player.x, this.player.y,
-      { x: this.boss.x + Math.cos(angle) * dist, y: this.boss.y + Math.sin(angle) * dist },
-    );
+    const range = BOSS_GOLD_SPAWN_RADIUS - BOSS_GOLD_SPAWN_MIN_RADIUS;
+    const dist = BOSS_GOLD_SPAWN_MIN_RADIUS + Math.random() * range;
+    const margin = 40;
+    const x = Math.max(margin, Math.min(this.w - margin, this.boss.x + Math.cos(angle) * dist));
+    const y = Math.max(margin, Math.min(this.h - margin, this.boss.y + Math.sin(angle) * dist));
+    this.bossGoldOrb = new Orb('gold', this.w, this.h, this.player.x, this.player.y, { x, y });
   }
 
   private update(): void {

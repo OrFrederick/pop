@@ -61,19 +61,21 @@ export const HIGH_SCORE_KEY = 'pop:highscore';
 
 // Boss
 export const BOSS_RADIUS = 32;
-export const BOSS_HP = 8;
+export const BOSS_HP = 6;
 export const BOSS_SPAWN_INTERVAL = 1800;
 export const BOSS_ESCAPE_FRAMES = 2400;
 export const BOSS_DEATH_DELAY = 30;
-export const BOSS_GOLD_SPAWN_RADIUS = 150;
+export const BOSS_GOLD_SPAWN_RADIUS = 220;
+export const BOSS_GOLD_SPAWN_MIN_RADIUS = 110;
 export const BOSS_BULLET_RADIUS = 5;
-export const BOSS_BULLET_SPEED = 2.5;
-export const BOSS_RING_INTERVAL = 120;
-export const BOSS_RING_COUNT = 12;
-export const BOSS_SPIRAL_INTERVAL = 8;
-export const BOSS_AIMED_INTERVAL = 90;
+export const BOSS_BULLET_SPEED = 2.0;
+export const BOSS_RING_INTERVAL = 150;
+export const BOSS_RING_COUNT = 8;
+export const BOSS_RING_TELEGRAPH = 30;
+export const BOSS_SPIRAL_INTERVAL = 22;
+export const BOSS_AIMED_INTERVAL = 140;
 export const BOSS_AIMED_SPREAD = (15 * Math.PI) / 180;
-export const BOSS_WOBBLE = 0.3;
+export const BOSS_WOBBLE = 0.18;
 export const SHAKE_BOSS_DEATH = 30;
 
 // Powerup

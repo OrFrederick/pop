@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { PulseBoss } from '../src/game/PulseBoss';
-import { BOSS_HP, BOSS_ESCAPE_FRAMES, BOSS_RING_COUNT, BOSS_RING_INTERVAL, BOSS_SPIRAL_INTERVAL } from '../src/game/constants';
+import { BOSS_HP, BOSS_ESCAPE_FRAMES, BOSS_RING_COUNT, BOSS_RING_INTERVAL } from '../src/game/constants';
 
 describe('PulseBoss', () => {
   it('starts at full HP', () => {
@@ -27,20 +27,26 @@ describe('PulseBoss', () => {
     bullets = boss.update(BOSS_RING_INTERVAL - 1, 1, 400, 300, 200, 200);
     expect(bullets.length).toBe(BOSS_RING_COUNT);
   });
-  it('wave 2 fires more bullets per frame than wave 1 over spiral window', () => {
-    const b1 = new PulseBoss(400, 300, 0);
-    const b2 = new PulseBoss(400, 300, 0);
-    let c1 = 0, c2 = 0;
-    for (let i = 0; i < BOSS_SPIRAL_INTERVAL * 10; i++) {
-      c1 += b1.update(i, 1, 400, 300, 200, 200).length;
-      c2 += b2.update(i, 2, 400, 300, 200, 200).length;
-    }
-    expect(c2).toBeGreaterThan(c1);
-  });
-  it('wave 3 fires aimed triple bullets', () => {
+  it('phase 1 (full HP) fires only rings', () => {
     const boss = new PulseBoss(400, 300, 0);
     let total = 0;
-    for (let i = 0; i < 100; i++) total += boss.update(i, 3, 400, 300, 0, 0).length;
+    for (let i = 0; i < BOSS_RING_INTERVAL - 1; i++) {
+      total += boss.update(i, 1, 400, 300, 200, 200).length;
+    }
+    expect(total).toBe(0);
+  });
+  it('phase 2 (mid HP) adds spiral bullets', () => {
+    const boss = new PulseBoss(400, 300, 0);
+    for (let i = 0; i < Math.ceil(BOSS_HP / 3); i++) boss.hit();
+    let total = 0;
+    for (let i = 0; i < 60; i++) total += boss.update(i, 1, 400, 300, 200, 200).length;
+    expect(total).toBeGreaterThan(0);
+  });
+  it('phase 3 (low HP) fires aimed bullets', () => {
+    const boss = new PulseBoss(400, 300, 0);
+    while (boss.hp > 1) boss.hit();
+    let total = 0;
+    for (let i = 0; i < 200; i++) total += boss.update(i, 1, 400, 300, 0, 0).length;
     expect(total).toBeGreaterThan(BOSS_RING_COUNT);
   });
 });
