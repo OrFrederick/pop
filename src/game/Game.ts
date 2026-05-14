@@ -41,7 +41,7 @@ import {
   effectiveComboMultiplier,
   type ActiveEffects, type UpgradeId,
 } from './ActiveEffects';
-import { loadHighScore, saveHighScore } from '../util/storage';
+import { loadHighScore, saveHighScore, loadControlMode, saveControlMode, type ControlMode } from '../util/storage';
 
 type GameState = 'idle' | 'playing' | 'boss' | 'upgrading' | 'gameover';
 
@@ -72,6 +72,10 @@ export class Game {
   private effects: ActiveEffects = createActiveEffects();
 
   private readonly keys = new Set<string>();
+  private controlMode: ControlMode;
+  private mouseX = 0;
+  private mouseY = 0;
+  private toggleEl: HTMLElement | null = null;
   private lastOrbFrame = 0;
   private lastSpikeFrame = 0;
   private lastPowerupFrame = 0;
@@ -87,6 +91,7 @@ export class Game {
     if (!ctx) throw new Error('Canvas 2D context unavailable');
     this.ctx = ctx;
     this.highScore = loadHighScore();
+    this.controlMode = loadControlMode();
     this.player = new Player(0, 0);
     this.hud = new HUD();
     this.overlays = new Overlays(this.restart.bind(this));
@@ -94,9 +99,28 @@ export class Game {
     this.powerupHUD = new PowerupHUD();
     this.upgradeScreen = new UpgradeScreen(this.applyUpgrade.bind(this));
     this.setupInput(canvas);
+    this.setupControlToggle();
     this.resize(canvas);
     window.addEventListener('resize', () => this.resize(canvas));
     this.hud.update(0, this.highScore, INITIAL_LIVES, 1);
+  }
+
+  private setupControlToggle(): void {
+    const el = document.getElementById('control-toggle');
+    if (!el) return;
+    this.toggleEl = el;
+    this.renderToggle();
+    el.addEventListener('click', () => {
+      this.controlMode = this.controlMode === 'keyboard' ? 'mouse' : 'keyboard';
+      saveControlMode(this.controlMode);
+      this.renderToggle();
+    });
+  }
+
+  private renderToggle(): void {
+    if (!this.toggleEl) return;
+    const label = this.controlMode === 'keyboard' ? 'KEYBOARD' : 'MOUSE';
+    this.toggleEl.textContent = `Control: ${label}`;
   }
 
   private get wave(): number {
@@ -113,6 +137,15 @@ export class Game {
       if (this.state === 'idle') this.begin();
     });
     window.addEventListener('keyup', (e) => { this.keys.delete(e.key.toLowerCase()); });
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      this.mouseX = e.clientX - rect.left;
+      this.mouseY = e.clientY - rect.top;
+    });
+    canvas.addEventListener('mousedown', () => {
+      resumeAudio();
+      if (this.state === 'idle') this.begin();
+    });
   }
 
   private resize(canvas: HTMLCanvasElement): void {
@@ -124,6 +157,10 @@ export class Game {
     canvas.style.width = `${this.w}px`;
     canvas.style.height = `${this.h}px`;
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (this.mouseX === 0 && this.mouseY === 0) {
+      this.mouseX = this.w / 2;
+      this.mouseY = this.h / 2;
+    }
   }
 
   private begin(): void {
@@ -286,7 +323,8 @@ export class Game {
     const magnetActive = isMagnetActive(this.effects, this.time) || this.effects.orbPull;
     const ghostActive = isGhostActive(this.effects, this.time);
 
-    this.player.update(this.keys, this.w, this.h);
+    const target = this.controlMode === 'mouse' ? { x: this.mouseX, y: this.mouseY } : undefined;
+    this.player.update(this.keys, this.w, this.h, target);
 
     const ax = magnetActive ? this.player.x : undefined;
     const ay = magnetActive ? this.player.y : undefined;

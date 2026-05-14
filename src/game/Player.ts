@@ -5,6 +5,7 @@ import {
   PLAYER_MAX_SPEED,
   PLAYER_TRAIL_LENGTH,
   PLAYER_FLICKER_INTERVAL,
+  PLAYER_MOUSE_DEAD_ZONE,
   TRAIL_FADE,
 } from './constants';
 
@@ -35,12 +36,22 @@ export class Player {
     this.trail = [];
   }
 
-  update(keys: Set<string>, w: number, h: number): void {
+  update(keys: Set<string>, w: number, h: number, target?: { x: number; y: number }): void {
     let ax = 0, ay = 0;
-    if (keys.has('arrowup') || keys.has('w')) ay -= PLAYER_ACCEL;
-    if (keys.has('arrowdown') || keys.has('s')) ay += PLAYER_ACCEL;
-    if (keys.has('arrowleft') || keys.has('a')) ax -= PLAYER_ACCEL;
-    if (keys.has('arrowright') || keys.has('d')) ax += PLAYER_ACCEL;
+    if (target) {
+      const dx = target.x - this.x;
+      const dy = target.y - this.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > PLAYER_MOUSE_DEAD_ZONE) {
+        ax = (dx / dist) * PLAYER_ACCEL;
+        ay = (dy / dist) * PLAYER_ACCEL;
+      }
+    } else {
+      if (keys.has('arrowup') || keys.has('w')) ay -= PLAYER_ACCEL;
+      if (keys.has('arrowdown') || keys.has('s')) ay += PLAYER_ACCEL;
+      if (keys.has('arrowleft') || keys.has('a')) ax -= PLAYER_ACCEL;
+      if (keys.has('arrowright') || keys.has('d')) ax += PLAYER_ACCEL;
+    }
 
     this.vx += ax;
     this.vy += ay;

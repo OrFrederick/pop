@@ -58,6 +58,8 @@ export const FLOAT_TEXT_FADE = 0.02;
 export const MOTION_BLUR_ALPHA = 0.25;
 
 export const HIGH_SCORE_KEY = 'pop:highscore';
+export const CONTROL_MODE_KEY = 'pop:controlmode';
+export const PLAYER_MOUSE_DEAD_ZONE = 8;
 
 // Boss
 export const BOSS_RADIUS = 32;
