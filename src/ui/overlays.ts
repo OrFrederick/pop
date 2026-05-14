@@ -4,6 +4,7 @@ export class Overlays {
   private readonly finalScore: HTMLElement;
   private readonly bestScore: HTMLElement;
   private readonly hint: HTMLElement;
+  private visible = false;
 
   constructor(onRestart: () => void) {
     this.overlay = document.getElementById('overlay')!;
@@ -12,6 +13,13 @@ export class Overlays {
     this.bestScore = document.getElementById('bestScore')!;
     this.hint = document.getElementById('hint')!;
     document.getElementById('restartBtn')!.addEventListener('click', onRestart);
+    window.addEventListener('keydown', (e) => {
+      if (!this.visible) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onRestart();
+      }
+    });
   }
 
   showStart(): void {
@@ -27,9 +35,11 @@ export class Overlays {
     this.finalScore.textContent = `Score: ${score}`;
     this.bestScore.textContent = `Best: ${highScore}`;
     this.overlay.classList.add('show');
+    this.visible = true;
   }
 
   hideGameOver(): void {
     this.overlay.classList.remove('show');
+    this.visible = false;
   }
 }
