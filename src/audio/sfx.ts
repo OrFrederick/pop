@@ -95,3 +95,4 @@ export function sfxUpgrade(): void {
   setTimeout(() => beep(392, 0.12, 'sine', 0.1), 180);
 }
 export function sfxBombCollect(): void { beep(80, 0.4, 'sawtooth', 0.15); }
+export function sfxShoot(): void { sweep(900, 1400, 0.06, 'square', 0.04); }

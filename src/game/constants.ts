@@ -119,6 +119,13 @@ export const ORB_STANDARD_WEIGHT = 75;
 export const ORB_GOLD_WEIGHT = 15;
 export const ORB_BOMB_WEIGHT = 10;
 
+// Shards (player projectiles)
+export const SHARD_SPEED = 10;
+export const SHARD_LIFETIME = 60;
+export const SHARD_RADIUS = 4;
+export const SHARD_COOLDOWN = 12;
+export const SHARD_SPIKE_POINTS = 5;
+
 // Spike variants
 export const SPIKE_FAST_COLOR = '#ff44cc';
 export const SPIKE_FAST_RADIUS = 10;

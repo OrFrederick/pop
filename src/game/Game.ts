@@ -13,12 +13,14 @@ import {
   ORB_GOLD_POINTS_MULT,
   PLAYER_MAX_SPEED, PLAYER_TRAIL_LENGTH,
   SHAKE_BOSS_DEATH,
+  SHARD_COOLDOWN, SHARD_SPIKE_POINTS,
 } from './constants';
 import { Player } from './Player';
 import { Orb, weightedOrbType } from './Orb';
 import { Spike, spikeTypeForWave } from './Spike';
 import { Powerup, weightedPowerupType } from './Powerup';
 import { Bullet } from './Bullet';
+import { Shard } from './Shard';
 import { PulseBoss } from './PulseBoss';
 import { Particle } from './Particle';
 import { FloatText } from './FloatText';
@@ -29,6 +31,7 @@ import {
   sfxBossSpawn, sfxBossHit, sfxBossDeath,
   sfxShieldAbsorb, sfxSlowActivate, sfxMagnetActivate,
   sfxFrenzyActivate, sfxGhostActivate, sfxUpgrade, sfxBombCollect,
+  sfxShoot,
 } from '../audio/sfx';
 import { HUD } from '../ui/HUD';
 import { Overlays } from '../ui/overlays';
@@ -64,6 +67,8 @@ export class Game {
   private spikes: Spike[] = [];
   private powerups: Powerup[] = [];
   private bullets: Bullet[] = [];
+  private shards: Shard[] = [];
+  private shootCooldown = 0;
   private particles: Particle[] = [];
   private texts: FloatText[] = [];
   private boss: PulseBoss | null = null;
@@ -144,8 +149,18 @@ export class Game {
     });
     canvas.addEventListener('mousedown', () => {
       resumeAudio();
-      if (this.state === 'idle') this.begin();
+      if (this.state === 'idle') { this.begin(); return; }
+      this.tryFireShard();
     });
+  }
+
+  private tryFireShard(): void {
+    if (this.state !== 'playing' && this.state !== 'boss') return;
+    if (this.shootCooldown > 0) return;
+    const dir = this.player.fireDirection();
+    this.shards.push(new Shard(this.player.x, this.player.y, dir.x, dir.y));
+    this.shootCooldown = SHARD_COOLDOWN;
+    sfxShoot();
   }
 
   private resize(canvas: HTMLCanvasElement): void {
@@ -183,7 +198,8 @@ export class Game {
     this.score = 0; this.lives = INITIAL_LIVES; this.time = 0;
     this.combo = 0; this.comboTimer = 0; this.invuln = 0; this.shake = 0;
     this.orbs = []; this.spikes = []; this.powerups = [];
-    this.bullets = []; this.particles = []; this.texts = [];
+    this.bullets = []; this.shards = []; this.shootCooldown = 0;
+    this.particles = []; this.texts = [];
     this.boss = null; this.bossDeathTimer = 0; this.bossGoldOrb = null;
     this.effects = createActiveEffects();
     this.lastOrbFrame = 0; this.lastSpikeFrame = 0; this.lastPowerupFrame = 0;
@@ -254,7 +270,12 @@ export class Game {
   private update(): void {
     this.time++;
     if (this.invuln > 0) this.invuln--;
+    if (this.shootCooldown > 0) this.shootCooldown--;
     if (this.comboTimer > 0) this.comboTimer--; else this.combo = 0;
+
+    if ((this.keys.has(' ') || this.keys.has('space')) && this.shootCooldown === 0) {
+      this.tryFireShard();
+    }
 
     const wave = this.wave;
     const orbCap = 4 + wave * 2 + this.effects.collector;
@@ -337,6 +358,38 @@ export class Game {
 
     this.bullets = this.bullets.filter(b => !b.offscreen(this.w, this.h));
     for (const b of this.bullets) b.update(slowMult);
+
+    for (const sh of this.shards) sh.update();
+    this.shards = this.shards.filter(sh => !sh.expired() && !sh.offscreen(this.w, this.h));
+
+    // Shard vs boss
+    if (this.boss && this.boss.hp > 0) {
+      for (let i = this.shards.length - 1; i >= 0; i--) {
+        if (!circleCircle(this.shards[i], this.boss)) continue;
+        this.shards.splice(i, 1);
+        this.boss.hit();
+        sfxBossHit();
+        this.bossBar.show(this.boss.hp, BOSS_HP);
+        this.explode(this.boss.x, this.boss.y, 50, 6);
+        if (this.boss.hp <= 0) { this.bossGoldOrb = null; break; }
+      }
+    }
+
+    // Shard vs spikes
+    for (let i = this.shards.length - 1; i >= 0; i--) {
+      const sh = this.shards[i];
+      let hit = false;
+      for (let j = this.spikes.length - 1; j >= 0; j--) {
+        if (!circleCircle(sh, this.spikes[j])) continue;
+        const spike = this.spikes.splice(j, 1)[0];
+        this.explode(spike.x, spike.y, 340, 14);
+        this.score += SHARD_SPIKE_POINTS;
+        this.texts.push(new FloatText(spike.x, spike.y, `+${SHARD_SPIKE_POINTS}`, '#aaeeff'));
+        hit = true;
+        break;
+      }
+      if (hit) this.shards.splice(i, 1);
+    }
 
     for (const p of this.particles) p.update();
     for (const t of this.texts) t.update();
@@ -495,6 +548,7 @@ export class Game {
     for (const s of this.spikes) s.draw(ctx);
     for (const p of this.powerups) p.draw(ctx);
     for (const b of this.bullets) b.draw(ctx);
+    for (const sh of this.shards) sh.draw(ctx);
     if (this.bossGoldOrb) this.bossGoldOrb.draw(ctx);
     if (this.boss) this.boss.draw(ctx);
     for (const p of this.particles) p.draw(ctx);
