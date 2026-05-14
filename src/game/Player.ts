@@ -28,6 +28,12 @@ export class Player {
     this.y = y;
   }
 
+  fireDirection(): { x: number; y: number } {
+    const sp = Math.hypot(this.vx, this.vy);
+    if (sp > 0.1) return { x: this.vx / sp, y: this.vy / sp };
+    return { x: 0, y: -1 };
+  }
+
   reset(x: number, y: number): void {
     this.x = x;
     this.y = y;
