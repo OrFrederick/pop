@@ -28,7 +28,11 @@ export class Player {
     this.y = y;
   }
 
-  fireDirection(): { x: number; y: number } {
+  fireDirection(override?: { x: number; y: number } | null): { x: number; y: number } {
+    if (override) {
+      const m = Math.hypot(override.x, override.y);
+      if (m > 0.0001) return { x: override.x / m, y: override.y / m };
+    }
     const sp = Math.hypot(this.vx, this.vy);
     if (sp > 0.1) return { x: this.vx / sp, y: this.vy / sp };
     return { x: 0, y: -1 };
@@ -47,9 +51,13 @@ export class Player {
     target?: { x: number; y: number },
     maxSpeed: number = PLAYER_MAX_SPEED,
     friction: number = PLAYER_FRICTION,
+    inputVec?: { x: number; y: number },
   ): void {
     let ax = 0, ay = 0;
-    if (target) {
+    if (inputVec) {
+      ax = inputVec.x * PLAYER_ACCEL;
+      ay = inputVec.y * PLAYER_ACCEL;
+    } else if (target) {
       const dx = target.x - this.x;
       const dy = target.y - this.y;
       const dist = Math.hypot(dx, dy);

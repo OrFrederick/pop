@@ -11,11 +11,13 @@ export function saveHighScore(score: number): void {
   localStorage.setItem(HIGH_SCORE_KEY, String(score));
 }
 
-export type ControlMode = 'keyboard' | 'mouse';
+export type ControlMode = 'keyboard' | 'mouse' | 'touch';
 
 export function loadControlMode(): ControlMode {
   const stored = localStorage.getItem(CONTROL_MODE_KEY);
-  return stored === 'mouse' ? 'mouse' : 'keyboard';
+  if (stored === 'mouse') return 'mouse';
+  if (stored === 'touch') return 'touch';
+  return 'keyboard';
 }
 
 export function saveControlMode(mode: ControlMode): void {
