@@ -135,3 +135,15 @@ export const SPIKE_HEAVY_RADIUS = 24;
 export const SPIKE_HEAVY_SPEED_MULT = 0.6;
 export const SPIKE_HEAVY_DAMAGE = 2;
 export const SPIKE_GHOST_FLICKER_INTERVAL = 20;
+
+// Progression
+export const BOSS_SPAWN_INTERVAL_MIN = 600;
+export const BOSS_SPAWN_INTERVAL_STEP = 200;
+
+// Sweep hazard
+export const SWEEP_INTERVAL = 240;
+export const SWEEP_WAVE_THRESHOLD = 5;
+export const SWEEP_DOUBLE_WAVE_THRESHOLD = 10;
+export const SWEEP_BULLET_COUNT = 12;
+export const SWEEP_TELEGRAPH_FRAMES = 30;
+export const SWEEP_BULLET_SPEED = 2.5;

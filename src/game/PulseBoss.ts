@@ -2,7 +2,29 @@ import {
   BOSS_RADIUS, BOSS_HP, BOSS_ESCAPE_FRAMES,
   BOSS_RING_INTERVAL, BOSS_RING_COUNT, BOSS_RING_TELEGRAPH,
   BOSS_SPIRAL_INTERVAL, BOSS_AIMED_INTERVAL, BOSS_AIMED_SPREAD, BOSS_WOBBLE,
+  BOSS_SPAWN_INTERVAL, BOSS_SPAWN_INTERVAL_MIN, BOSS_SPAWN_INTERVAL_STEP,
 } from './constants';
+
+export function bossSpawnIntervalForWave(wave: number): number {
+  return Math.max(BOSS_SPAWN_INTERVAL_MIN, BOSS_SPAWN_INTERVAL - (wave - 1) * BOSS_SPAWN_INTERVAL_STEP);
+}
+
+export function bossRingCountForWave(wave: number): number {
+  return Math.min(24, BOSS_RING_COUNT + (wave - 1));
+}
+
+export function bossSpiralIntervalForWave(wave: number): number {
+  return Math.max(8, BOSS_SPIRAL_INTERVAL - wave);
+}
+
+export function bossAimedIntervalForWave(wave: number): number {
+  return Math.max(60, BOSS_AIMED_INTERVAL - wave * 8);
+}
+
+export function bossAimedSpreadCountForWave(wave: number): number {
+  if (wave >= 10) return 5;
+  return 3;
+}
 import { Bullet } from './Bullet';
 
 export class PulseBoss {
@@ -69,7 +91,8 @@ export class PulseBoss {
     }
     if (this.ringTimer >= BOSS_RING_INTERVAL) {
       this.ringTimer = 0;
-      const count = enrage ? BOSS_RING_COUNT + 2 : BOSS_RING_COUNT;
+      const baseCount = bossRingCountForWave(wave);
+      const count = enrage ? baseCount + 2 : baseCount;
       const offset = Math.random() * Math.PI * 2;
       for (let i = 0; i < count; i++) {
         bullets.push(new Bullet(this.x, this.y, offset + (i / count) * Math.PI * 2, sm));
@@ -78,7 +101,7 @@ export class PulseBoss {
 
     // Spiral unlocks after first hit, or on wave 3+ regardless.
     const spiralUnlocked = wounded || wave >= 3;
-    if (spiralUnlocked && ++this.spiralTimer >= BOSS_SPIRAL_INTERVAL) {
+    if (spiralUnlocked && ++this.spiralTimer >= bossSpiralIntervalForWave(wave)) {
       this.spiralTimer = 0;
       this.spiralAngle += 0.35;
       bullets.push(new Bullet(this.x, this.y, this.spiralAngle, sm));
@@ -86,11 +109,14 @@ export class PulseBoss {
     }
 
     // Aimed: enrage phase only.
-    if (enrage && ++this.aimTimer >= BOSS_AIMED_INTERVAL) {
+    if (enrage && ++this.aimTimer >= bossAimedIntervalForWave(wave)) {
       this.aimTimer = 0;
       const base = Math.atan2(playerY - this.y, playerX - this.x);
-      for (let i = -1; i <= 1; i++) {
-        bullets.push(new Bullet(this.x, this.y, base + i * BOSS_AIMED_SPREAD, sm));
+      const count = bossAimedSpreadCountForWave(wave);
+      const halfSpread = ((count - 1) / 2) * BOSS_AIMED_SPREAD;
+      for (let i = 0; i < count; i++) {
+        const off = -halfSpread + i * BOSS_AIMED_SPREAD;
+        bullets.push(new Bullet(this.x, this.y, base + off, sm));
       }
     }
 

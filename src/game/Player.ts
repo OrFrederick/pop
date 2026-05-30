@@ -42,7 +42,12 @@ export class Player {
     this.trail = [];
   }
 
-  update(keys: Set<string>, w: number, h: number, target?: { x: number; y: number }): void {
+  update(
+    keys: Set<string>, w: number, h: number,
+    target?: { x: number; y: number },
+    maxSpeed: number = PLAYER_MAX_SPEED,
+    friction: number = PLAYER_FRICTION,
+  ): void {
     let ax = 0, ay = 0;
     if (target) {
       const dx = target.x - this.x;
@@ -61,13 +66,13 @@ export class Player {
 
     this.vx += ax;
     this.vy += ay;
-    this.vx *= PLAYER_FRICTION;
-    this.vy *= PLAYER_FRICTION;
+    this.vx *= friction;
+    this.vy *= friction;
 
     const sp = Math.hypot(this.vx, this.vy);
-    if (sp > PLAYER_MAX_SPEED) {
-      this.vx = (this.vx / sp) * PLAYER_MAX_SPEED;
-      this.vy = (this.vy / sp) * PLAYER_MAX_SPEED;
+    if (sp > maxSpeed) {
+      this.vx = (this.vx / sp) * maxSpeed;
+      this.vy = (this.vy / sp) * maxSpeed;
     }
 
     this.x += this.vx;
