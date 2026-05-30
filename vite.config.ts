@@ -2,7 +2,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/pop/',
+  base: '/',
   build: {
     outDir: 'dist',
     target: 'es2022',
