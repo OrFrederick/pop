@@ -1,9 +1,11 @@
 import { SHARD_SPEED, SHARD_LIFETIME, SHARD_RADIUS } from './constants';
 
-interface TrailPoint {
-  x: number;
-  y: number;
-  life: number;
+interface TrailPoint { x: number; y: number; life: number; }
+
+export interface ShardOptions {
+  damage?: number;
+  pierce?: number;
+  speedMult?: number;
 }
 
 export class Shard {
@@ -13,14 +15,19 @@ export class Shard {
   vy: number;
   readonly r = SHARD_RADIUS;
   life: number = SHARD_LIFETIME;
+  damage: number;
+  pierce: number;
   private trail: TrailPoint[] = [];
 
-  constructor(x: number, y: number, dirX: number, dirY: number) {
+  constructor(x: number, y: number, dirX: number, dirY: number, opts: ShardOptions = {}) {
     this.x = x;
     this.y = y;
     const mag = Math.hypot(dirX, dirY) || 1;
-    this.vx = (dirX / mag) * SHARD_SPEED;
-    this.vy = (dirY / mag) * SHARD_SPEED;
+    const speed = SHARD_SPEED * (opts.speedMult ?? 1);
+    this.vx = (dirX / mag) * speed;
+    this.vy = (dirY / mag) * speed;
+    this.damage = opts.damage ?? 1;
+    this.pierce = opts.pierce ?? 0;
   }
 
   update(slowMult = 1): void {
@@ -32,9 +39,7 @@ export class Shard {
     for (const t of this.trail) t.life -= 0.18;
   }
 
-  expired(): boolean {
-    return this.life <= 0;
-  }
+  expired(): boolean { return this.life <= 0; }
 
   offscreen(w: number, h: number): boolean {
     return this.x < -20 || this.x > w + 20 || this.y < -20 || this.y > h + 20;

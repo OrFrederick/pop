@@ -52,4 +52,21 @@ describe('Shard', () => {
     const s2 = new Shard(400, 300, 1, 0);
     expect(s2.offscreen(800, 600)).toBe(false);
   });
+
+  it('defaults: damage 1, pierce 0', () => {
+    const s = new Shard(0, 0, 1, 0);
+    expect(s.damage).toBe(1);
+    expect(s.pierce).toBe(0);
+  });
+
+  it('accepts damage and pierce in options', () => {
+    const s = new Shard(0, 0, 1, 0, { damage: 3, pierce: 2 });
+    expect(s.damage).toBe(3);
+    expect(s.pierce).toBe(2);
+  });
+
+  it('speedMult scales velocity', () => {
+    const s = new Shard(0, 0, 1, 0, { speedMult: 2 });
+    expect(s.vx).toBeCloseTo(SHARD_SPEED * 2);
+  });
 });
