@@ -54,6 +54,7 @@ export class EvolutionScreen {
     title.textContent = 'CHOOSE EVOLUTION';
 
     const row = document.createElement('div');
+    row.className = 'upgrade-row';
     Object.assign(row.style, {
       display: 'flex', gap: '20px', alignItems: 'stretch',
       flexWrap: 'wrap', justifyContent: 'center', maxWidth: '900px',
@@ -61,6 +62,7 @@ export class EvolutionScreen {
 
     this.options.forEach((u, i) => {
       const card = document.createElement('div');
+      card.className = 'upgrade-card';
       card.dataset['idx'] = String(i);
       Object.assign(card.style, {
         background: 'rgba(255,209,102,0.07)', border: '1px solid rgba(255,209,102,0.3)',

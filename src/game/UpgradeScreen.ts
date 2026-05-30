@@ -83,10 +83,15 @@ export class UpgradeScreen {
     title.textContent = 'CHOOSE UPGRADE';
 
     const row = document.createElement('div');
-    Object.assign(row.style, { display: 'flex', gap: '20px', alignItems: 'stretch' });
+    row.className = 'upgrade-row';
+    Object.assign(row.style, {
+      display: 'flex', gap: '20px', alignItems: 'stretch',
+      flexWrap: 'wrap', justifyContent: 'center',
+    });
 
     this.options.forEach((u, i) => {
       const card = document.createElement('div');
+      card.className = 'upgrade-card';
       card.dataset['idx'] = String(i);
       Object.assign(card.style, {
         background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.2)',

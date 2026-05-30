@@ -57,6 +57,10 @@ import { XPBar } from '../ui/XPBar';
 import { StatHUD } from '../ui/StatHUD';
 import { EvolutionScreen } from '../ui/EvolutionScreen';
 import { UpgradeScreen } from './UpgradeScreen';
+import { TouchInput, detectTouchDevice } from './TouchInput';
+import { TouchHUD } from '../ui/TouchHUD';
+import { StatInvestOverlay } from '../ui/StatInvestOverlay';
+import { OrientationNag } from '../ui/OrientationNag';
 import {
   createActiveEffects, isSlowActive, isMagnetActive, isGhostActive,
   effectiveComboTimeout, effectivePowerupInterval, effectiveSpikeInterval,
@@ -112,6 +116,10 @@ export class Game {
   private readonly xpBar: XPBar;
   private readonly statHud: StatHUD;
   private readonly evolutionScreen: EvolutionScreen;
+  private readonly touch: TouchInput;
+  private readonly touchHud: TouchHUD;
+  private readonly statInvest: StatInvestOverlay;
+  private readonly orientationNag: OrientationNag;
 
   private xp: XPState = createXP();
   private statTree: StatTree = createStatTree();
@@ -128,7 +136,9 @@ export class Game {
     if (!ctx) throw new Error('Canvas 2D context unavailable');
     this.ctx = ctx;
     this.highScore = loadHighScore();
-    this.controlMode = loadControlMode();
+    const storedMode = loadControlMode();
+    const touchDetected = detectTouchDevice();
+    this.controlMode = touchDetected ? 'touch' : storedMode;
     this.player = new Player(0, 0);
     this.hud = new HUD();
     this.overlays = new Overlays(this.restart.bind(this));
@@ -138,11 +148,23 @@ export class Game {
     this.xpBar = new XPBar();
     this.statHud = new StatHUD();
     this.evolutionScreen = new EvolutionScreen(this.applyEvolutionPick.bind(this));
+    this.touch = new TouchInput(canvas);
+    this.touchHud = new TouchHUD();
+    this.statInvest = new StatInvestOverlay((id) => this.tryInvestStat(id), this.statTree);
+    this.orientationNag = new OrientationNag();
     this.xpBar.update(this.xp);
     this.statHud.update(this.statTree, this.xp.points);
+    this.statInvest.setFabEnabled(this.controlMode === 'touch');
+    this.orientationNag.setEnabled(this.controlMode === 'touch');
+    document.body.classList.toggle('touch-mode', this.controlMode === 'touch');
     this.setupInput(canvas);
     this.setupControlToggle();
     this.resize(canvas);
+    this.touch.setOnAnyPress(() => {
+      resumeAudio();
+      if (this.state === 'idle') this.begin();
+    });
+    this.touch.attach();
     window.addEventListener('resize', () => this.resize(canvas));
     this.hud.update(0, this.highScore, INITIAL_LIVES, 1);
   }
@@ -161,7 +183,10 @@ export class Game {
 
   private renderToggle(): void {
     if (!this.toggleEl) return;
-    const label = this.controlMode === 'keyboard' ? 'KEYBOARD' : 'MOUSE';
+    const label =
+      this.controlMode === 'keyboard' ? 'KEYBOARD'
+      : this.controlMode === 'mouse' ? 'MOUSE'
+      : 'TOUCH';
     this.toggleEl.textContent = `Control: ${label}`;
   }
 
@@ -195,10 +220,10 @@ export class Game {
     });
   }
 
-  private tryFireShard(): void {
+  private tryFireShard(aimOverride?: { x: number; y: number } | null): void {
     if (this.state !== 'playing' && this.state !== 'boss') return;
     if (this.shootCooldown > 0) return;
-    const dir = this.player.fireDirection();
+    const dir = this.player.fireDirection(aimOverride);
     const newShards = fireShards(this.player.x, this.player.y, dir.x, dir.y, this.evolution, this.statTree);
     this.shards.push(...newShards);
     this.shootCooldown = this.evolution.cooldownFrames(this.statTree);
@@ -214,6 +239,7 @@ export class Game {
       if (this.lives < cap) this.lives++;
     }
     this.statHud.update(this.statTree, this.xp.points);
+    this.statInvest.update(this.statTree, this.xp.points);
     this.texts.push(new FloatText(this.player.x, this.player.y - 20, `+${id.toUpperCase()}`, '#6ee7ff'));
     sfxUpgrade();
   }
@@ -245,6 +271,7 @@ export class Game {
     }
     this.xpBar.update(this.xp);
     this.statHud.update(this.statTree, this.xp.points);
+    this.statInvest.update(this.statTree, this.xp.points);
   }
 
   private resize(canvas: HTMLCanvasElement): void {
@@ -260,6 +287,7 @@ export class Game {
       this.mouseX = this.w / 2;
       this.mouseY = this.h / 2;
     }
+    this.touch?.setViewport(this.w, this.h);
   }
 
   private begin(): void {
@@ -299,6 +327,8 @@ export class Game {
     this.lastOrbFrame = 0; this.lastSpikeFrame = 0; this.lastPowerupFrame = 0;
     this.state = 'playing';
     this.player.reset(this.w / 2, this.h / 2);
+    this.touch.reset();
+    this.statInvest.hide();
     this.overlays.hideGameOver();
     this.bossBar.hide();
     this.powerupHUD.clear();
@@ -306,6 +336,7 @@ export class Game {
     this.hud.setActiveUpgrades([]);
     this.xpBar.update(this.xp);
     this.statHud.update(this.statTree, this.xp.points);
+    this.statInvest.update(this.statTree, this.xp.points);
   }
 
   private explode(x: number, y: number, hue: number, count: number, big = false): void {
@@ -380,6 +411,13 @@ export class Game {
 
     if ((this.keys.has(' ') || this.keys.has('space')) && this.shootCooldown === 0) {
       this.tryFireShard();
+    }
+
+    if (this.controlMode === 'touch') {
+      const aim = this.touch.aim;
+      if (TouchInput.engaged(aim) && this.shootCooldown === 0) {
+        this.tryFireShard({ x: aim.vec.x, y: aim.vec.y });
+      }
     }
 
     const wave = this.wave;
@@ -479,7 +517,11 @@ export class Game {
     const target = this.controlMode === 'mouse' ? { x: this.mouseX, y: this.mouseY } : undefined;
     const baseSpeed = (PLAYER_MAX_SPEED + this.effects.maxSpeedBonus) * maxSpeedMult(this.statTree.moveSpeed);
     const friction = this.effects.frictionOverride ?? PLAYER_FRICTION;
-    this.player.update(this.keys, this.w, this.h, target, baseSpeed, friction);
+    let inputVec: { x: number; y: number } | undefined;
+    if (this.controlMode === 'touch' && TouchInput.engaged(this.touch.move)) {
+      inputVec = { x: this.touch.move.vec.x, y: this.touch.move.vec.y };
+    }
+    this.player.update(this.keys, this.w, this.h, target, baseSpeed, friction, inputVec);
 
     const ax = magnetActive ? this.player.x : undefined;
     const ay = magnetActive ? this.player.y : undefined;
@@ -750,10 +792,15 @@ export class Game {
 
     ctx.restore();
     this.powerupHUD.draw(ctx, this.w, this.h);
+
+    if (this.controlMode === 'touch' && (this.state === 'playing' || this.state === 'boss')) {
+      this.touchHud.draw(ctx, this.w, this.h, this.touch.move, this.touch.aim);
+    }
   }
 
   tick(): void {
-    if (this.state === 'playing' || this.state === 'boss') this.update();
+    const paused = this.statInvest.isVisible() || this.orientationNag.isShowing();
+    if (!paused && (this.state === 'playing' || this.state === 'boss')) this.update();
     this.draw();
   }
 }
